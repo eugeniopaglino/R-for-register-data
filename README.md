@@ -1,6 +1,6 @@
 R for Register Data Users workshop. 
 
-You can see the content [here](https://htmlpreview.github.io/?https://github.com/eugeniopaglino/R_for_register_data/blob/main/R/R_for_register_data.html)
+You can see the content [here](https://htmlpreview.github.io/?https://github.com/eugeniopaglino/R-for-register-data/blob/main/R/R_for_register_data.html)
 
 If you want to download all of this repository's code to your own machine, you should open a Terminal sessions (if on Mac) or a Command Prompt (if on Windows) and type the following commands:
 
