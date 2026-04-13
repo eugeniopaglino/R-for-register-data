@@ -1,0 +1,2 @@
+"0","# Tabulate variable (data.table)"
+"0","data[,.(N=.N),by=.(SEX)] # This is an example of using the j and by syntax"

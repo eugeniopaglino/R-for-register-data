@@ -1,0 +1,4 @@
+"0","# Select columns which we want to modify"
+"0","vars_to_fct <- c('sex','mar_stat','race','hispanic','edu','bmi','smoke')"
+"0","# Apply the as.factor function to all columns at the same time"
+"0","data[,(vars_to_fct):=lapply(.SD,as.factor),.SDcols = vars_to_fct]"

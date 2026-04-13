@@ -1,0 +1,2 @@
+"0","svg(here('figures','my_first_plot.svg'),width = 8,height = 4)"
+"0","plot1 + plot2 + plot_annotation(tag_levels = 'A')"

@@ -1,0 +1,2 @@
+"0","# See first 5 rows"
+"0","head(data) # Or more rows by specifying n=number_of_rows"

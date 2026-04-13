@@ -1,0 +1,6 @@
+"0","# Or also
+aggregate(b,g,sum)
+"
+"2","Error in aggregate.data.frame(as.data.frame(x), ...) : 
+  'by' must be a list
+"

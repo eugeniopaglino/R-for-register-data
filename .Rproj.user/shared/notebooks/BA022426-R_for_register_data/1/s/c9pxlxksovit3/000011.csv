@@ -1,0 +1,1 @@
+"0","data[,edu:=fct_relevel(edu,'less than high school','high school','some college','bachelor','graduate')]"

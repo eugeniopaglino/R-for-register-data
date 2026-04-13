@@ -1,0 +1,1510 @@
+---
+title: "R for Register Data Users"
+author: "Eugenio Paglino"
+output: html_document
+---
+
+<style type="text/css">
+  .reveal p {
+    text-align: left;
+    font-size: 0.7em;
+  }
+  .reveal ul {
+    display: block;
+    font-size: 0.7em;
+  }
+  .reveal ol {
+    display: block;
+    font-size: 0.7em;
+  } 
+  .reveal section img {
+    border: none;
+    box-shadow: none; 
+  }
+</style>
+
+```{r setup, echo=F}
+knitr::opts_chunk$set(echo = T,
+                      message = F,
+                      warning = F,
+                      fig.align = 'center',
+                      fig.height = 3,
+                      fig.width = 5)
+
+```
+
+```{r, echo=F}
+
+library(here)
+library(tidyverse)
+library(data.table)
+
+i_am('R/R_for_register_data.Rmd')
+
+```
+
+### What Is a Program?
+
+In its essence, a program is a sequence of instructions that specifies how to perform a computation. 
+
+Computations can be of different types:
+
+- computing the mean of a set of numbers
+- replacing the substring 'pre' with 'post' in a list of strings
+- producing a graphic representation of some data
+
+Every programming language has its own quirks but in general, every program (even the more complex ones) is a combination of a few basic instructions:
+
+- **input**: Get data from the keyboard, a file, the network, or some other device.
+- **output**: Display data on the screen, save it in a file, send it over the network, etc.
+- **math**: Perform basic mathematical operations like addition and multiplication.
+- **conditional execution**: Check for certain conditions and run the appropriate code.
+- **repetition**: Perform some action repeatedly, usually with some variation.
+
+## Coding Basics
+
+The key building blocks of most languages are objects. In R, objects may be variables, arrays of numbers, character strings, functions, or more general structures built from such components. All R statements where you create objects, assignment statements, have the same form:
+
+```{r, eval=F}
+object_name <- value
+```
+
+Where `<-` is the assignment operator. This statement tells R that an object called `object_name` should be created and assigned the value `value`. A specific example could be:
+
+```{r}
+our_first_string <- 'Hello World'
+```
+
+### Naming Conventions
+
+It is a good practice to use descriptive names and a consistent style. People have their own taste. Some commonly used alternatives are:
+
+```{r,eval=F}
+iMostlyUseCamelCase
+other_people_use_snake_case
+some.people.use.periods
+And_aFew.People_RENOUNCEconvention # Not recommended
+```
+
+You can inspect an object by typing its name:
+
+```{r}
+our_first_string
+```
+
+*Exercise*
+
+Try to create a new object called `my_first_object` and assign it the value 5.4:
+
+```{r,eval=F}
+my_first_object <- 
+```
+
+Then inspect it and check that everything worked as expected:
+
+```{r,eval=F}
+ 
+```
+
+*Solution*
+
+```{r}
+my_first_object <- 5.4
+my_first_object
+```
+
+### Types
+
+Objects in R can be of different types (modes). The basic types of objects are:
+
+- `numeric`, `integer` (no decimals) or `double` (with decimals)
+- `logical` (TRUE or FALSE values)
+- `character` (strings)
+
+You can inspect an object's type by typing:
+
+```{r}
+typeof(my_first_object)
+```
+
+A series of objects of the same type can be grouped into a `vector`. Vectors in R are defined as follows:
+
+```{r}
+my_first_vector <- c(1,2,5,7)
+```
+
+If you try to create a vector with objects of different types, R will try to coerce them to a common type:
+
+```{r}
+(illegal_vector <- c(1,'3',5,FALSE))
+```
+
+In that case you'll need to use a list:
+
+```{r}
+my_first_list <- list(1,'3',5,FALSE)
+```
+
+Objects can be easily converted from one type to another (when it makes sense to do so). Here is an example:
+
+```{r}
+(z <- 0:9) # Parentheses will make R print the object
+```
+
+```{r}
+(digits <- as.character(z))
+```
+
+A further coercion reconstructs the numerical vector:
+
+```{r}
+(d <- as.integer(digits))
+```
+### Indexing
+
+Elements of vectors can be accessed with square brackets
+
+```{r}
+d[1] # Get first element
+d[2:5] # Get elements 2 to 5
+d[-1] # Get all elements but the first one
+d[c(1,4,6)] # Get elements 1, 4, and 6
+d[d>5] # Only get elements greater than 5
+```
+Lists require double square brackets to extract a single element (don't ask me why)
+
+```{r}
+my_first_list[[1]] # Get first element
+```
+But if you want a sublist, then you can do
+
+```{r}
+my_first_list[1] # Get sublist with just the first element
+my_first_list[c(2,4)] # Get sublist with elements 2 and 4
+```
+
+### Functions
+
+A special and very useful type of object is a *function*. As a general concept, a function takes some objects as inputs or parameters and uses them to complete an action or produce another object. For example, the `seq()` function takes three main arguments and returns the sequence of values from `from` to `to` in steps of length `by`.
+
+```{r}
+seq(from=1, to=5, by=1)
+```
+
+This works because `seq` belongs to the core of the R language.
+
+You can define your own functions in the same way you create an object:
+
+```{r,eval=F}
+my.function <- function(arg1 = val1, arg2 = val2, ...) {
+  do.something(arg1,arg2)
+}
+```
+
+For example, we can create a function that takes a vector of numbers and adds 2 to each of its elements:
+
+```{r}
+add2 <- function(numbers) {
+  return(numbers + 2) # The return statement tells R to output the result but it's not strictly needed
+}
+
+add2(1:4)
+```
+
+Notice that we did not have to specify what kind of object `numbers` should be. This is good because it makes our job easier, and we don't need to write separate functions for, say, a single integer and a vector, but it makes functions prone to breaking, with not very helpful error messages.
+
+```{r, eval=F}
+add2(as.character(1:4)) # If you run this it will tell you: Error in numbers + 2 : non-numeric argument to binary operator
+```
+
+We can of course fix this with error handling but things obviously get more complicated.
+
+```{r}
+add2 <- function(numbers) {
+  
+  # We'll get into if statements in a minute
+  if (!is.numeric(numbers)) {
+    stop("Error: Input must be a numeric vector.")
+  }
+  
+  return(numbers + 2) # The return statement tells R to output the result
+}
+```
+
+```{r, eval=F}
+add2(as.character(1:4)) # If you run this it will tell you: Error: Input must be a numeric vector
+```
+
+Sometimes, you'll run into situations in which you need a small function that's not worth naming. This is also called an anonymous function in some languages (e.g. Python). For this cases, where the function is needed you can just write
+
+```{r, eval=F}
+function(x) x*2 + 5
+```
+
+Later we'll see some examples
+
+### Mathematical Operations
+
+In our last example, you've seen how R can perform basic mathematical operations. Mathematical operators mostly work as expected:
+
+```{r,eval=F}
+ + # Addition 
+ - # Subtraction 
+ * # Multiplication 
+ / # Division 
+ ^ # Exponentiation 
+ %% # Modulus
+ %*% # Matrix multiplication
+```
+
+In addition to mathematical operators, R also has logical operators:
+
+```{r,eval=F}
+ & or && # AND 
+ | or ||# OR 
+ ! # NOT
+```
+
+Because `R` is a smart language, many basic functions are automatically vectorized when applied over vectors. For example, the `exp`, the `+`, the `*`, and the `log` operations can all be applied directly to an entire vector.
+
+*Exercise*
+
+Try to define a function that takes the following vector of numbers as input and returns a vector in which each element has been divided by 2 and raised to the 2nd power:
+
+```{r,eval=F}
+numbers <- 1:5
+
+divide.by.2.and.square <- function(numbers) {
+   # write your code here
+}
+```
+
+Now check that it produces the desired result:
+
+```{r,eval=F}
+divide.by.2.and.square(numbers)
+```
+
+*Solution*
+
+```{r}
+numbers <- 1:5
+
+divide.by.2.and.square <- function(numbers) {
+  return((numbers/2)^2)
+}
+```
+
+Now check that it produces the desired result:
+
+```{r}
+divide.by.2.and.square(numbers)
+```
+
+### Conditional Execution
+
+Often you need to perform one operation or another based on a given condition. This is what it is known as conditional execution. In R, you can implement it as follows:
+
+```{r,eval=F}
+if (some_condition) {
+  execute.this()
+} else {
+  execute.that()
+}
+```
+
+The expression or object that replaces `someCondition` must evaluate to either `TRUE` or `FALSE`.
+
+Here is an example:
+
+```{r}
+season <- 'summer'
+if (season == 'summer') {
+  print('hot')
+} else {
+  print('cold')
+}
+```
+
+Conditional expressions can also be chained:
+
+```{r,eval=F}
+if (some_condition) {
+  execute.this()
+} else if (some_other_condition) {
+  execute.that()
+} else {
+  execute.something.else()
+}
+```
+
+or nested:
+
+```{r,eval=F}
+if (some_condition) {
+  execute.this()
+} else {
+  if (some_other_condition) {
+    execute.that()
+  }
+}
+```
+
+*Exercise*
+
+Write a function that computed the square root of a number if the number is strictly positive and the square root of its absolute value if it is negative:
+
+```{r,eval=F}
+compute.square <- function(number) {
+  if (some_condition) { # change the condition
+    # write your code here
+  } else {
+    # write your code here
+  }
+}
+```
+
+Now check that it produces the desired result:
+
+```{r,eval=F}
+compute.square(4)
+compute.square(-16)
+```
+
+*Solution*
+
+```{r}
+compute.square <- function(number) {
+  if (number > 0) {
+    return(sqrt(number))
+  } else {
+    return(sqrt(abs(number)))
+  }
+}
+```
+
+```{r}
+compute.square(4)
+compute.square(-16)
+```
+Notice that `if` and `else` do not work with a vector of logical values. So you'll get an error if you do
+
+```{r, eval=F}
+if (d>5) {
+  d <- d + 2
+}
+```
+
+For cases like this, you can use the `ifelse` function (base R)
+
+```{r}
+d_new <- ifelse(d>5,d+2,d)
+d_new
+```
+
+### Loops and Repetition
+
+Sometimes you need to repeat the same operation more than once with some variation. Here is an example:
+
+```{r}
+countdown <- function(n){
+  while (n > 0) {
+    print(n)
+    n <- n - 1
+  }
+  print('Blastoff!')
+}
+countdown(3)
+```
+
+The `while` statement checks if a condition is `TRUE` (here `n>0`) and keeps executing the code in curly brackets when (if ever) it turns `FALSE`. Make sure that you are not setting up an infinite loop!
+
+A second alternative when you know exactly how many iterations you need to run is the `for` statement. Here is how we wuld rewrite the `countdown` function with a `for` loop.
+
+```{r}
+countdown <- function(n){
+  for (i in n:1) {
+    print(i)
+  }
+  print('Blastoff!')
+}
+countdown(3)
+```
+
+## Efficient data manipulation with `data.table`
+
+What we explored so far is part of the core R language. Indeed, we did not import any package. 
+
+A package is a collection of functions pulled together by someone in order to perform a given set of operations. in R, packages are installed and loaded with the commands:
+
+```{r,eval=F}
+install.packages('package_name')
+library(package_name)
+```
+
+Once a package is loaded, you can use its functions as if they were R core functions. If you want help with a function, you can type `?function_name` in your console to access its documentation. Also, if you just type `function_name`, with no brackets, R will print out the function's code in the console. This can be useful if the developer did not hide the function's code (which happens frequently), and if the function is not too complicated. If you just need a specific function from a certain package and don't want to load the rest of package, you can also call `package_name::function_name`. You also need to use this syntax when two loaded packages have a function with the same name and you want to make sure that the right one is used.
+
+There are many specialized packages in R, to build visualizations, to work with geographical data, to perform text analysis, etc.. Among R packages, the [`tidyverse`](https://www.tidyverse.org) collection stands out as coherent framework to perform all the most common data science operations, from reading the data, to cleaning it, to visualizing it.
+
+The `tidyverse` is great and has contributed to the popularity of R. But... it's not the most efficient package and struggles when handling large objects. While you can use selected `tidyverse` functions and sub-packages even with large data in certain situations (wel'll see examples from `stringr` for string manipulation and `forcats` for working with categorical variables), today I'll cover the main alternative to the `tidyverse` when efficiency is crucial (e.g. in FIONA).
+
+Not everything you could do with the `tidyverse` is implemented in `data.table` (for example data visualization) but what you can do in `data.table` will be significantly more computationally efficient than its `tidyverse` equivalent.
+
+### `fread` and `fwrite` Reading and Writing Data
+
+`.csv` is by far the most common format for rectangular data. You can read `.csv` files into R using `data.table` as follows:
+
+```{r,eval=F}
+fread(path_to_file)
+```
+
+You can select which columns to read with the `select` argument, specify column types with the `colClasses` argument, and specify a non standard delimiter with the `sep` argument. We can also specify whether we want to skip a number of rows after the header with the `skip` argument and set the maximum number of rows we want to read with the `nrow` argument. These two arguments are useful to read a large dataset in chunks and process each one separately. This is a general approach to reduce RAM usage and the only solution when your machine does not have enough RAM to store the entire object into memory.
+
+Here is a typical chunk of code to do this:
+
+```{r,eval=F}
+# Assume we know the number of rows in advance
+n_rows <- 10000
+chunk_size <- 1000
+skips <- seq(0,n_rows,chunk_size)
+my_data <- vector(mode='list',length=length(skips))
+
+for (i in 1:length(my_data)) {
+  my_data[[i]] <- fread(path_to_file,skip=skips[i],nrows=chunk_size)
+}
+
+my_data <- rbindlist(my_data) # Some people would object to this
+```
+
+`fread` is highly customizable and offers many useful options to take care of parsing problems. Unfortunately `fread` can't read stata `.dta` files, for those we have to use `read_dta` from the `haven` package (another `tidyverse` package).
+
+Once you have transformed the data you read and are satisfied with the result, you can write it to a file as follows:
+
+```{r,eval=F}
+fwrite(transformed_data,path_to_file)
+```
+
+### `data.table` philosophy
+
+While unintuitive at first, the core `data.table` syntax is simple and boils down to statements of the type
+
+```{r,eval=F}
+DT[i, j, by]
+```
+
+Which means "Take DT, subset/reorder rows using i, then calculate j, grouped by by." This might be familiar to you if you've ever used SQL. Sometimes, you'll just need to subset your data, and thus will only use i operations, sometimes you'll just need to add a column, or modify and existing column, and thus will only need j.
+
+To keep things real, let us load some data we can play with. This is data from the 2010 National Health Interview Survey which I downloaded from IPUMS. It has to be read with a special syntax but then we'll save it as a csv file so we can practice both writing and reading a file.
+
+```{r}
+# Read data with IPUMS package (ipumsr)
+ddi <- ipumsr::read_ipums_ddi(here('data','NHIS','nhis_00007.xml'))
+data <- ipumsr::read_ipums_micro(ddi) # Example of using a function without loading the full package
+
+# Convert to data.table
+setDT(data)
+
+# Select some variables (j operation)
+data <- data[,.(NHISHID,PERWEIGHT,AGE,SEX,MARSTCUR,RACENEW,HISPETH,EDUC,BMICAT,BMICALC,DIABETICAGE,SMOKESTATUS2)]
+
+# Write to csv file
+fwrite(data,here('output','data','NHIS_data.csv'))
+
+# Remove from memory
+rm(data) # Good practice in FIONA
+gc(verbose = F) # Only needed when removing large objects from memory
+
+# Read the csv version
+data <- fread(here('output','data','NHIS_data.csv'))
+```
+
+Just for fun, we can also try loading it with our memory-efficient loop. We don't know the number of rows so we'll modify our loop a bit so it automatically stops when there are no more rows.
+
+```{r}
+chunk_size <- 10000
+skip_rows <- 1 # Because the header counts!
+my_data <- vector(mode='list',length=10) # To keep stuff efficient we still need a guess for the max size
+
+# Read header
+header <- fread(here('outputs','data','NHIS_data.csv'), header = TRUE, nrow = 1)
+
+# Read first chunk
+my_data[[1]] <- fread(here('outputs','data','NHIS_data.csv'),nrows=chunk_size)
+
+# Set up counter and update skip_rows
+i <- 2
+skip_rows <- skip_rows + chunk_size
+
+while (nrow(my_data[[i-1]])==chunk_size) {
+  my_data[[i]] <- fread(here('outputs','data','NHIS_data.csv'),skip=skip_rows,nrows=chunk_size,header=F)
+  setnames( my_data[[i]], colnames(header))
+  skip_rows <- skip_rows + chunk_size
+  i <- i+1
+}
+
+my_data <- rbindlist(my_data) # Some people would object to this
+
+# We don't really need this so we can remove it
+rm(my_data)
+gc()
+```
+
+Let's start with some basics. We can look at an object with the RStudio viewer, and that is typically the easiest way. However, when the object is very large, it might take time to load, and we might prefer just interacting with it through commands.
+
+```{r}
+# See variable names
+names(data)
+```
+
+```{r}
+# See first 5 rows
+head(data) # Or more rows by specifying n=number_of_rows
+```
+
+```{r}
+# Get summary information
+summary(data)
+```
+
+```{r}
+# Get summary information (alternative)
+str(data)
+```
+
+We can get the number of rows in the data
+
+```{r}
+nrow(data)
+```
+
+See the unique values in a variable (without creating a table)
+
+```{r}
+unique(data$EDUC)
+```
+
+Count the number of unique values
+
+```{r}
+length(unique(data$EDUC))
+```
+
+Sometimes it is useful to tabulate certain variables.
+
+```{r}
+# Tabulate variable (base R way)
+table(data$SEX)
+```
+
+```{r}
+# Tabulate variable (data.table)
+data[,.(N=.N),by=.(SEX)] # This is an example of using the j and by syntax
+```
+
+You can do this with more than one variable
+
+```{r}
+table(data$SEX,data$EDUC)
+```
+
+Let's say we find these ALL CAPS variable names annoying. We can rename as follows
+
+```{r}
+# Rename syntax example
+old_names <- names(data)
+new_names <- str_to_lower(old_names)
+
+setnames(data,old_names,new_names)
+```
+
+Note that we could have just changed some names. In a typical workflow, the next step might be to recode the variables based on info from the NHIS documentation.
+
+```{r}
+# Code sex to factor (j syntax to create or modify variable)
+data[,sex:=fifelse(sex==1,'male','female')] # This works like ifelse but it's more efficient
+
+# Code marital status and simplify
+data[
+  ,
+  mar_stat:=fcase(
+    marstcur==0,'not asked',
+    between(marstcur,1,3),'married', # Alternative syntax marstcur %in% 1:3
+    marstcur==4,'separated',
+    marstcur==5,'divorced',
+    marstcur==6,'widowed',
+    marstcur==7,'cohabiting',
+    marstcur==8,'never married',
+    marstcur==9,NA_character_
+  )
+]
+
+# Remove original variable (efficiently because no copying occurrs)
+data[,marstcur:=NULL]
+
+# Recode race
+data[
+  ,
+  race:=fcase(
+    racenew==100,'white',
+    racenew==200,'black',
+    racenew==300,'AIAN',
+    racenew==400,'asian',
+    racenew==530,NA_character_,
+    racenew==541,'multirace'
+  )
+]
+
+# Remove original variable
+data[,racenew:=NULL]
+
+# Recode hispanic origin and simplify (alternative syntax)
+data[,hispanic:='hispanic']
+data[hispeth==10,hispanic:='non hispanic']
+
+# Remove original variable
+data[,hispeth:=NULL]
+
+# Recode education and simplify
+data[
+  ,
+  edu:=fcase(
+    educ==0,'not asked',
+    between(educ,100,116),'less than high school',
+    between(educ,200,202),'high school',
+    between(educ,300,303),'some college',
+    educ==400,'bachelor',
+    educ>400 & educ<900,'graduate',
+    educ>=900,NA_character_
+  )
+]
+
+# Remove original variable
+data[,educ:=NULL]
+
+# Recode BMI and simplify
+data[
+  ,
+  bmi:=fcase(
+    bmicat==1,'<18.5',
+    bmicat==2,'18.5-25',
+    bmicat==3,'25-30',
+    bmicat==4,'>30',
+    bmicat==9,NA_character_
+  )
+]
+
+# Remove original variable
+data[,bmicat:=NULL]
+
+# Set correct missing values for continuous BMI
+data[,bmi_c := bmicalc]
+data[is.na(bmi),bmi_c:=NA_real_]
+
+# Remove original variable (efficiently)
+data[,bmicalc:=NULL]
+
+# Recode smoking status
+data[
+  ,
+  smoke:=fcase(
+    smokestatus2==11,'every day smoker',
+    smokestatus2==12,'some day smoker',
+    smokestatus2==20,'former smoker',
+    smokestatus2==30,'never smoker',
+    smokestatus2==40,NA_character_,
+    smokestatus2==90,NA_character_
+  )
+]
+
+# Remove original variable (efficiently)
+data[,smokestatus2:=NULL]
+```
+
+Let's take a look at our cleaned dataset.
+
+```{r}
+str(data)
+```
+
+We can see that all our categorical variables are stored as characters. This is ok but characters don't have a clear notion of ordering. When we need to define a specific order we can use a factor. We can use this to illustrate one very useful `data.table` trick
+
+```{r}
+# Select columns which we want to modify
+vars_to_fct <- c('sex','mar_stat','race','hispanic','edu','bmi','smoke')
+# Apply the as.factor function to all columns at the same time
+data[,(vars_to_fct):=lapply(.SD,as.factor),.SDcols = vars_to_fct]
+```
+
+Check
+
+```{r}
+str(data)
+```
+
+We can now order factor variables
+
+```{r}
+data[,edu:=fct_relevel(edu,'less than high school','high school','some college','bachelor','graduate')]
+# fct_relevel comes from the forcats library
+# We left one level out because I don't like typing but it works because it will automatically be last
+```
+
+#### Small Digression
+
+What is this `lapply` thingy a few code blocks above? `lapply` is part of the `apply` family of functions that are sort of compact loops for simple operations. Some examples.
+
+```{r}
+# Define a vector
+a <- c('I','you','we','they')
+
+# Add "go" to the end of each string
+sapply(a,function(x) paste0(x,' go')) # Vector as output, example of anonymous function
+
+# If we needed a list, we would do
+lapply(a,function(x) paste0(x,' go'))
+
+# Sum vector elements by group
+b <- seq(1:6)
+g <- rep(1:3,each=2)
+tapply(b,g,sum) # Can be quite useful when working with vectors and matrices!
+
+# If we felt posh, we could have written
+sapply(unique(g),function(x) sum(b[g==x]))
+
+# apply is the most general version but I don't find it particularly intuitive
+
+# Define a matrix
+my_mat <- matrix(
+  c(c(1,2,3),
+    c(4,5,6),
+    c(7,8,9)),
+  byrow = T,
+  nrow=3,
+  ncol=3
+)
+
+# Subtract row mean to each row
+t(apply(my_mat,M=1,function(x) x - mean(x))) # M=1 for row-wise operations and M=2 for column-wise
+
+# A more efficient way would be
+sweep(my_mat,M=1,STATS=matrixStats::rowMeans2(my_mat),FUN="-")
+# matrixStats::rowMeans2(my_mat) is the same as apply(my_mat,M=1,mean) but more efficient 
+# Sweep is great but the syntax is not intuitive and I always forget what goes where
+```
+
+Combining `sapply`, `tapply`, aggregation functions for matrices from `matrixStats`, and `sweep` can get you very far and give you extremely efficient code.
+
+#### Back to Work
+
+We can be proud of our work. Suppose we want to take a look at prevalence of smoking by age, sex, and educational attainment. It probably makes sense to 1) group ages, 2) restrict the sample to certain ages.
+
+```{r}
+# take a quick look at the age distribution
+hist(data$age) # Not pretty but quick (fancy stuff later on)
+```
+
+Say we want to create 5-year age groups and a top category for 85+ (the variable is top-coded anyway)
+
+```{r}
+data[,age_group:=cut(age,seq(0,90,5),right=F)] # Not the most straightforward syntax
+data[age_group=='[85,90)',age_group:='85+']
+```
+
+We could quickly create a table of prevalence rates (i.e. proportion by smoking status) by age, sex, and education.
+
+```{r}
+# The base r way
+sweep(
+  table(data$age_group,data$smoke,useNA = 'always'), 
+  M=1, 
+  table(data$age_group,useNA = 'always'), 
+  FUN = '/'
+  )
+# Another good use case for sweep!
+```
+
+```{r}
+# The data.table way. 
+freq_table <- data[,.(N=.N),by=.(age_group,smoke)] # example of grouping and aggregation
+freq_table <- freq_table[,freq:=N/(sum(N)),by=.(age_group)] # example of grouping without aggregation
+
+# Taking advantage to illustrate the syntax for a long to wide pivot
+freq_table_wide <- dcast(
+  freq_table,
+  age_group ~ smoke,
+  value.var = 'freq',
+  fill = 0
+)
+# I forget the syntax every time even though I use this daily
+
+freq_table_wide
+```
+
+We could revert back to long format.
+
+```{r}
+# Example of wide to long conversion
+freq_table_long <- melt(
+  freq_table_wide,
+  id.vars = 'age_group',
+  variable.name = 'smoke',
+  value.name = 'freq'
+)
+
+freq_table_long
+```
+
+We could use this table for a visualization but... We'll have to wait until we get to the visualization section. 
+
+Looking at the table, we see that the smoking questions are not asked to respondents below age 15. We can filter these individuals out and save this as a separate dataset. Because we are going to use education as a covariate, we'll also exclude people aged 29 or below because education would not be reliably measured for younger individuals.
+
+```{r}
+data_smoke <- data[age>=30] # in data.table, filtering always create a copy
+```
+
+We'll also drop the very old.
+
+```{r}
+data_smoke <- data_smoke[age<85] # in data.table, filtering always create a copy
+data_smoke <- data_smoke[!is.na(edu)] # Drop observations with missing education
+```
+
+### Some Statistical Modeling
+
+Back to our question of whether smoking prevalence varies by educational status, we could start by operationalizing our outcome as being currently a smoker.
+
+```{r}
+data_smoke[,current_smoker:=0]
+data_smoke[smoke %chin% c('every day smoker','some day smoker'),current_smoker:=1]
+# %chin% is a more efficient version of %in% specialized for characters
+```
+
+The simplest model we can run is a linear probability model. We can do that easily:
+
+```{r}
+lm_fit <- lm(current_smoker ~ 1 + edu + age_group + sex,data=data_smoke)
+summary(lm_fit)
+```
+
+Not the nicest output maybe. We can do better.
+
+```{r}
+# This is your friend to summarize models. Highly customizable and outputs a 
+# data.frame so can be easily manipulated further
+broom::tidy(lm_fit)
+```
+
+We could have also used a logistic model, so a generalized linear model.
+
+```{r}
+glm_fit <- glm(current_smoker ~ 1 + edu + age_group + sex,data=data_smoke,family = 'binomial')
+
+# Can be used to fit other GLMs
+# poisson, gamma, quansi poisson, see MASS::glm.nb for negative-binomial
+
+summary(glm_fit)
+```
+
+We could have decided that dummy variables for age are annoying (they certainly are) and opted for a GAM.
+
+```{r}
+library(mgcv)
+gam_fit <- gam(current_smoker ~ 1 + edu + s(age,k=20) + sex,data=data_smoke)
+summary(gam_fit)
+```
+
+```{r}
+# Secret trick
+plot(gam_fit) # To quickly visualize the smooth terms
+```
+
+Just for fun, we could decide to fit a model with random intercepts for age (not a great idea but good show the syntax)
+
+```{r}
+library(lme4)
+mlm_fit <- lmer(current_smoker ~ 1 + edu + sex + (1 | age_group),data=data_smoke)
+summary(mlm_fit)
+```
+
+### Working with Models
+
+Back to our basic linear model, R gives use some useful functions to manipulate the model object.
+
+```{r}
+# Simplify model to keep things simple
+lm_fit <- lm(current_smoker ~ 1 + edu + age + sex + edu:sex,data=data_smoke)
+# Extract coefficients
+coef(lm_fit)
+```
+
+```{r}
+# Extract variance-covariance matrix
+vcov(lm_fit)
+```
+
+```{r}
+# Predict
+predict(lm_fit)[1:5]
+# To predict on new data use predict(lm_fit,newdata=new_data)
+```
+
+```{r}
+# Get residuals
+residuals(lm_fit)[1:5]
+```
+
+Want to do some fancy simulations? Easy-peasy
+
+```{r}
+# Get model matrix
+X <- model.matrix(lm_fit,data=data_smoke)
+# Get simulated coefficients from multivariate Normal
+beta <- MASS::mvrnorm(1000,coef(lm_fit),vcov(lm_fit))
+y <- beta %*% t(X) # Matrix algebra is great!
+
+# Get means, medians, percentiles efficiently
+library(matrixStats) # This is your friend for fast matrix manipulation
+y_mean <- colMeans2(y)
+y_median <- colMedians(y)
+y_q <- colQuantiles(y,probs = c(0.025,0.975))
+
+# Assemble into a data.table
+y_summary <- data.table(
+  y_real = data_smoke$current_smoker,
+  y_mean = y_mean,
+  y_median = y_median,
+  y_025 = y_q[,1],
+  y_975 = y_q[,2]
+)
+
+y_summary[1:5]
+```
+
+I use this basic workflow a lot to get confidence intervals for complex quantities. We could also compute the average proportion of current smokers by sex and education level.
+
+```{r}
+# Create new data
+new_data <- expand.grid(
+  current_smoker=1,
+  age=30:84,
+  sex=unique(data_smoke$sex),
+  edu=unique(data_smoke$edu)
+)
+# Great function to create a data.frame from combinations of column values
+
+# Make it a data.table
+setDT(new_data)
+
+# Get model matrix
+X <- model.matrix(lm_fit,data=new_data) # Also useful to understand model structure
+# Get simulated coefficients from multivariate Normal
+beta <- MASS::mvrnorm(1000,coef(lm_fit),vcov(lm_fit))
+y <- beta %*% t(X)
+
+# Define groups
+new_data[,group:=.GRP,by=.(sex,edu)]
+
+# Average over age to get marginal effect
+y <- sapply(unique(new_data$group), function(g) {
+  rowMeans2(y[,new_data$group==g])
+})
+# Yes, this is a more complex version of our tapply using sapply example
+
+# Get means, medians, percentiles efficiently
+y_mean <- colMeans2(y)
+y_median <- colMedians(y)
+y_q <- colQuantiles(y,probs = c(0.025,0.975))
+
+# Assemble into a data.table
+y_summary <- data.table(
+  y_real = data_smoke[,.(prop=mean(current_smoker)),by=.(sex,edu)],
+  y_mean = y_mean,
+  y_median = y_median,
+  y_025 = y_q[,1],
+  y_975 = y_q[,2]
+)
+
+y_summary
+```
+
+We can easily visualize all of our hard work.
+
+```{r,fig.width=10}
+# Bit of a spoiler
+y_summary |>
+  ggplot() +
+  geom_point(mapping=aes(x=y_real.edu,y=y_mean)) +
+  geom_linerange(mapping=aes(x=y_real.edu,ymin=y_025,ymax=y_975)) +
+  facet_wrap(~y_real.sex) +
+  labs(x='Education',y='Proportion of current smokers') +
+  theme_bw()
+```
+
+Ok, this was nice! 
+
+We covered some frequently used statistical methods but there are many specialized statistical packages for other methods:
+
+  - `feols` for efficient fixed-effects estimation (economists I am looking at you!)
+  - `rstan` and `brms`, R interfaces to Bayesian inference with Stan 
+  - `rjags`, R interfaces to Bayesian inference with JAGS 
+  - `INLA`, approximate Bayesian inference
+  - `survival` survival models (and many utilities for survival data)
+  - `MASS` lots of utility functions and more statistical models (e.g. ordered logistic regression, negative binomial models)
+  - `nnet` (hint: you need three of these and a trenchcoat to create a multistate model)
+  - `censReg` censored regression models (tobit)
+  - `forecast` ARIMA and friends
+  - `DemoTools` everything demography (`DemoDecomp` for demographic decomposition methods)
+  - `sampleSelection` Heckman selection models
+  
+The R package environment can be confusing and there is a non trivial degree of duplication (multiple packages doing the same thing, likely with a different syntax). At the same time, R is the language of choice for the statistical community (excluding ML and economists) so the breadth of models you can fit with R is very impressive.
+
+### Dealing with Multiple Models
+
+Often, you'll need to run multiple models on the same dataset. For example, we might want to run separate models for sex and race combinations. Here is one way of doing it
+
+```{r}
+# Create group indicator
+data_smoke[,group:=.GRP,by=.(sex,race)] # .GRP is data.table lingo, there is also .N for group size
+models <- vector(mode='list',length = max(data_smoke$group))
+
+for (i in 1:length(models)) {
+  this_lm_fit <- lm(current_smoker ~ 1 + edu + age,data=data_smoke[group==i])
+  models[[i]] <- this_lm_fit
+}
+```
+
+We could then have another loop to do something with our models. Say we want to store the predicted proportions for each individual, we could do
+
+```{r}
+# Create group indicator
+data_smoke[,group:=.GRP,by=.(sex,race)]
+# Create dictionary of groups
+group_dict <- unique(data_smoke[,.(group,sex,race)]) # R is smart and dispatches unique to unique.data.table
+# Set up data structure
+predict_data <- vector(mode='list',length = max(data_smoke$group))
+
+for (i in 1:length(models)) {
+  this_lm_fit <- lm(current_smoker ~ 1 + edu + age,data=data_smoke[group==i])
+  this_predict_data <- data.table(y_pred=predict(this_lm_fit))
+  
+  # Add group to keep track
+  this_predict_data[,group:=i]
+  
+  # Add to list
+  predict_data[[i]] <- this_predict_data
+}
+
+# Create single data.table
+predict_data <- rbindlist(predict_data)
+# Bring back group variables
+predict_data <- merge(predict_data,group_dict,by='group')
+```
+
+You can make this more complicated, potentially wrapping the code inside the for loop into one or multiple functions, but the basic structure is the same.
+
+### Combining Datasets
+
+One more thing worth illustrating is how to combine datasets (merge). Let's go back to our full data and suppose we want to standardize continuous BMI values so they have mean zero and a standard deviation of one. We want to do this separately by sex because the distribution might be different.
+
+The fastest way of doing this would be:
+
+```{r}
+# Get rid of respondents for which BMI is missing
+data_bmi <- data[!is.na(bmi_c)]
+
+# Compute mean and standard deviation of BMI
+data_bmi[,bmi_mean:=mean(bmi_c),by=.(sex)]
+data_bmi[,bmi_sd:=sd(bmi_c),by=.(sex)]
+
+# We can then create our standardized BMI scores
+data_bmi[,bmi_std:=(bmi_c-bmi_mean)/bmi_sd]
+
+# Let's check that everything is right
+mean(data_bmi$bmi_std)
+sd(data_bmi$bmi_std)
+```
+
+But, if for some reason we first want to compute the sex-specific means and standard deviations, we could do so and the merge the resulting data.table onto our data:
+
+```{r}
+# Get rid of respondents for which BMI is missing
+data_bmi <- data[!is.na(bmi_c)]
+
+# Compute mean and standard deviation of BMI
+data_bmi_summary <- data_bmi[,.(bmi_mean=mean(bmi_c),bmi_sd=sd(bmi_c)),by=.(sex)]
+# Example of aggregation with by
+
+# Merge
+data_bmi <- merge(data_bmi,data_bmi_summary,by=c('sex'))
+
+# We can then create our standardized BMI scores
+data_bmi[,bmi_std:=(bmi_c-bmi_mean)/bmi_sd]
+
+# Let's check that everything is right
+mean(data_bmi$bmi_std)
+sd(data_bmi$bmi_std)
+```
+
+The result is the same. The operation we just performed is also known as joining. There are four types which `data.table` conveniently handles with just one function:
+
+  - Inner join: keeps only entries found in both databases. This is the default option.
+  - Left join: keeps only entries found in left database. Specify option `all.x=T`.
+  - Right join: keeps only entries found in left database. Specify option `all.y=T`.
+  - Outer join: keeps any entry found in one of the two databases. Specify option `all=T`.
+
+Also, the two data.table might have different names for the same variables. It is possible to specify different merging variables in the first (x) and second (y) table with options `by.x` and `by.y`. However, I think having consistent names across tables is advisable.
+
+### Building Visualization with `ggplot2`
+
+`ggplot2` is a general purpose library for visualizing data. The key principle of `ggplot2` is the idea of building up a plot by combining different layers, each responsible for a specific function. You can learn more about `ggplot2` philosophy [here](http://vita.had.co.nz/papers/layered-grammar.pdf) but it's probably best to start with an example. We will be using the following classic dataset:
+
+```{r}
+head(iris) # Returns the first 5 elements
+```
+
+We wish to plot sepal length against sepal width.
+
+```{r}
+ggplot(data=iris)+ # Notice that we use + and not the pipe |>
+  geom_point(mapping=aes(x=Sepal.Length,y=Sepal.Width))
+```
+
+We specify that the data we want to use is in the `iris` object. Then we add our first layer `geom_point` and tell `ggplot2` that `Sepal.Length` should be mapped to the x-axis and `Sepal.Width` should be mapped to the y-axis.
+
+Congratulations! This is your first graph. Suppose we want to change point shape based on the species.
+
+```{r}
+ggplot(data=iris) + # Notice that we use + and not the pipe %>%
+  geom_point(
+    mapping=aes(
+      x=Sepal.Length,
+      y=Sepal.Width,
+      shape=Species)
+    )
+```
+
+We just need to map the `Species` variable to the shape aesthetic.
+
+If we felt that the shape alone is not enough to help the viewer separate points by species, we could add color:
+
+```{r}
+plot <- ggplot(
+  data=iris,
+  mapping=aes(x=Sepal.Length,y=Sepal.Width) 
+  ) +
+  geom_point(mapping=aes(shape=Species,color=Species)) 
+
+plot
+```
+
+Note that whatever we set in the first call to `ggplot` (i.e. before any other layers are added), gets inherited by all subsequent layers. However, we can always overwrite it if, for example, we want to use a different dataset just for a specific layer (though things get tricky).
+
+Suppose we want to focus on a specific portion of the graph:
+
+```{r}
+plot +
+  coord_cartesian(xlim=c(6,7),ylim=c(2.5,3.5))
+```
+
+`coord_cartesian` controls the coordinates and can zoom on a part of the plot. Notice that we have stored our previous plot into the `plot` object and we are now adding more layers to it with the `+` operator. It's sort of an algebra of graphics.
+
+We can change the axis labels and add a title:
+
+```{r}
+plot +
+  labs(x='Sepal Length',
+       y='Sepal Width',
+       title='The Relationship of Sepal Width and Lenght')
+```
+
+We could also add a regression line:
+
+```{r} 
+plot +
+  geom_smooth(method = 'lm', se = F,color='gray') 
+```
+
+Maybe it would be better to have each species in a separate graph:
+
+```{r, fig.width=7}
+plot +
+  facet_wrap(~Species)
+```
+
+`facet_grid` allows to specify which variables should be used in the rows and which in the columns.
+
+We are not confined to points. Here is a histogram of sepal length.
+
+```{r}
+ggplot(iris) +
+  geom_histogram(mapping=aes(x=Sepal.Length),
+                 bins = 10,color='black',fill='white')
+```
+
+There are many different geometries you can use:
+
+- Lines: `geom_line`
+- Boxplots: `geom_boxplot`
+- Densities: `geom_density`
+- Maps: `geom_map`
+- Error Bars: `geom_errorbar`
+- Uncertainty Intervals: `geom_ribbon`
+
+and many more.
+
+You can customize almost every aspect of a plot: axes, labels, grid lines, legend, orientation, size, palettes. However, `ggplot2` also offers a set of themes that modify several aspects of a figure at once:
+
+```{r} 
+plot +
+  theme_minimal()
+```
+
+```{r} 
+plot +
+  theme_bw()
+```
+
+```{r} 
+plot +
+  theme_classic()
+```
+
+and more are available through the `ggthemes` package. You can combine different geometries and other elements to build very complex visualizations. Here are two examples from my own research. For example, we could combine two different plots and some panel tags.
+
+```{r,fig.width=6}
+# Create plot of sepal length over width
+plot1 <- iris |>
+  ggplot() +
+  geom_point(mapping=aes(x=Sepal.Width,y=Sepal.Length)) +
+  geom_smooth(mapping=aes(x=Sepal.Width,y=Sepal.Length)) +
+  labs(x='Sepal width',y='Sepal length') +
+  theme_minimal()
+
+plot1
+
+# Create plot of petal length over width
+plot2 <- iris |>
+  ggplot() +
+  geom_point(mapping=aes(x=Petal.Width,y=Petal.Length)) +
+  geom_smooth(mapping=aes(x=Petal.Width,y=Petal.Length)) +
+  labs(x='Petal width',y='Petal length') +
+  theme_minimal()
+
+plot2
+
+# Combine
+library(patchwork)
+plot1 + plot2 + plot_annotation(tag_levels = 'A')
+```
+
+We can save plots through `R`'s graphic devices. I am a fan of svg, but there are many formats. The basic syntax is:
+
+```{r}
+svg(here('outputs','figures','my_first_plot.svg'),width = 8,height = 4)
+plot1 + plot2 + plot_annotation(tag_levels = 'A')
+dev.off()
+```
+
+I would not recommend non-vector formats (e.g. png or jpeg), because it's hard to get them in the desired definition (at least I find it hard).
+
+*Exercise*
+
+Using the `iris` dataset, create a new graph with a different box plot of `Sepal.Width` for each Species. Label the axes in an appropriate way. Use the theme you prefer.
+
+```{r,eval=F} 
+ggplot(data=iris) +
+  geom_*(mapping=aes(x=,y=)) +
+  labs() +
+  theme_*()
+```
+
+*Solution*
+
+```{r} 
+ggplot(data=iris) +
+  geom_boxplot(mapping=aes(x=Species,y=Sepal.Width)) +
+  labs(y='Sepal Width') +
+  theme_bw()
+```
+
+There are more packages for specialized graphs. Some examples:
+
+  - `ggh4x` extensions to `ggplot`, particularly useful for fancy faceting
+  - `geofacet` geofaceting
+  - `colorspace` colors
+  - `ggsci` those beautiful color palettes from big journals
+
+### Amazing Tables with `gt`
+
+R is great for automating table creation. We can use our frequency table in `freq_table_wide` to illustrate what we can do.
+
+```{r}
+library(gt)
+
+# Fix column order
+setcolorder(
+  freq_table_wide,
+  c('age_group','every day smoker','some day smoker',
+    'former smoker','never smoker','NA')
+  )
+
+# We can make the proportions into percentage so they look prettier
+vars_to_multiply <- c(
+  'every day smoker','some day smoker',
+  'former smoker','never smoker','NA'
+  )
+
+freq_table_wide[,(vars_to_multiply):=lapply(.SD,function(x) x*100),.SDcols = vars_to_multiply]
+
+freq_table_wide |>
+  gt() |>
+  cols_label(
+    age_group='Age',
+    `every day smoker`='Every day smoker',
+    `some day smoker`='Some day smoker',
+    `former smoker`='Former smoker',
+    `never smoker`='Never smoker',
+    `NA`='Missing'
+  ) |>
+  fmt_number(
+    `every day smoker`:`NA`,
+    decimals = 2
+  )
+```
+
+Now another example with our predictions in `y_summary`, to show some additional functionalities.
+
+```{r}
+# Drop median and observed proportion and give better names
+y_summary[,c('y_real.prop','y_median'):=NULL]
+setnames(y_summary,c('y_real.sex','y_real.edu'),c('sex','edu'))
+
+# I don't like typing so simplify sex
+y_summary[,sex:=fifelse(sex=='female','f','m')]
+
+# We can make the proportions into percentage so they look prettier
+vars_to_multiply <- c('y_mean','y_025','y_975')
+
+y_summary[,(vars_to_multiply):=lapply(.SD,function(x) x*100),.SDcols = vars_to_multiply]
+
+# First reshape to wide
+y_summary_table <- dcast(
+  y_summary,
+  edu ~ sex,
+  value.var = c('y_mean','y_025','y_975')
+)
+
+# Set column order
+setcolorder(y_summary_table,c('edu','y_mean_f','y_025_f','y_975_f'))
+
+# Create table
+y_summary_table |>
+  gt() |>
+  cols_label(
+    edu='Educational attainment',
+    y_mean_f='Mean',
+    y_025_f='2.5th pct',
+    y_975_f='97.5th pct',
+    y_mean_m='Mean',
+    y_025_m='2.5th pct',
+    y_975_m='97.5th pct'
+  ) |>
+  fmt_number(
+    y_mean_f:y_975_m,
+    decimals = 2
+  ) |>
+  tab_spanner(
+    y_mean_f:y_975_f,
+    label='Female'
+  ) |>
+  tab_spanner(
+    y_mean_m:y_975_m,
+    label='Male'
+  )
+```
+
+We could have made something simpler by first creating a pretty formatted column
+
+```{r}
+# Create summary column and remove the rest
+# Create utility function to round and pad
+# (Yes this might have gotten a bit out of hand)
+round_and_pad <- function(x,decimals=2) {
+  rounded_x <- as.character(round(x,decimals))
+  
+  # Split integer and decimal part
+  integer_part <- str_match(rounded_x,'^\\d+') # Regular expressions!
+  
+  # Is there a decimal part?
+  decimal_part <- fifelse(
+    str_detect(rounded_x,'\\.'),
+    str_match(rounded_x,'\\d+$'),
+    paste0(rep('0',decimals),collapse='')
+    )
+  # Is this a vectorized if else statement? Yes it is!
+  
+  # Pad integer part
+  integer_part <- str_pad(integer_part,width = 2, pad=' ',side='left')
+  
+  # Pad decimal part
+  decimal_part <- str_pad(decimal_part,width = 2, pad='0',side='right')
+  
+  clean_x <- paste0(integer_part,'.',decimal_part)
+  clean_x
+}
+
+y_summary[,y_sum:=paste0(
+  round_and_pad(y_mean,2),
+  ' (',
+  round_and_pad(y_025,2),
+  ', ',
+  round_and_pad(y_975,2),
+  ')'
+  )]
+
+# First reshape to wide
+y_summary_table <- dcast(
+  y_summary,
+  edu ~ sex,
+  value.var = c('y_sum')
+)
+
+# Create table
+y_summary_table |>
+  gt() |>
+  cols_label(
+    edu='Educational attainment',
+    f='Female',
+    m='Male'
+  ) |>
+  tab_spanner(
+    f:m,
+    label='Mean (2.5 pct, 97.5 pct)'
+  )
+```
+
+To save, we can do
+
+```{r}
+# Create table
+y_summary_table |>
+  gt() |>
+  cols_label(
+    edu='Educational attainment',
+    f='Female',
+    m='Male'
+  ) |>
+  tab_spanner(
+    f:m,
+    label='Mean (2.5 pct, 97.5 pct)'
+  ) |>
+  gtsave(filename = here('outputs','tables','my_table.docx'))
+```
+
+### Ask Me Anything
+
+We covered quite a bit of material, and you should be able to do most data cleaning, model fitting, and post-estimation operations starting from the basic building blocks we saw. But, you might have specific applications in mind that you are not quite sure how to implement with the tools we saw. This is a good moment to ask.
+
+```{r, echo=F, purl = FALSE, message=F, warning=F, eval=F}
+knitr::purl(here::here('R','R_for_register_data.Rmd'),documentation = 2)
+```

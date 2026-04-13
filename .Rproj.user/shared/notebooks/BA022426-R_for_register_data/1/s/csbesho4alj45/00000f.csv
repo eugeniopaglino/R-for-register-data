@@ -1,0 +1,5 @@
+"0","# Rename syntax example"
+"0","old_names <- names(data)"
+"0","new_names <- str_to_lower(old_names)"
+"0",""
+"0","setnames(data,old_names,new_names)"
